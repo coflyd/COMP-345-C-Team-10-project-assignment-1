@@ -7,11 +7,11 @@ Course :
 Description : 
   This project consists of implementing the core components of the Warzone game engine in C++.
   The implementation follows an object-oriented design and is divided into five main parts:
-    Map
-    Player
-    Orders
-    Cards
-    Game Engine
+    - Map
+    - Player
+    - Orders
+    - Cards
+    - Game Engine
 Each component is implemented in its own .h/.cpp file pair and includes a corresponding driver file to demonstrate its functionality.
 
 Recall 
