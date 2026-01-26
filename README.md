@@ -1,17 +1,9 @@
 # COMP-345-C-Team-project-assignment-1
 
 Warzone Game Engine – C++ Project TEAM 10
-
-Course : 
-  COMP 345 – Advanced Design in C++
 Description : 
-  This project consists of implementing the core components of the Warzone game engine in C++.
-  The implementation follows an object-oriented design and is divided into five main parts:
-    - Map
-    - Player
-    - Orders
-    - Cards
-    - Game Engine
+This project consists of implementing the core components of the Warzone game engine in C++.
+The implementation follows an object-oriented design and is divided into five main parts: Map, Player, Orders, Cards, Game Engine
 Each component is implemented in its own .h/.cpp file pair and includes a corresponding driver file to demonstrate its functionality.
 
 Recall 
