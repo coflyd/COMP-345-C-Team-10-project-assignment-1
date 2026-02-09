@@ -1,4 +1,4 @@
-# COMP-345-C-Team-10-project-assignment-1
+# COMP-345-C-Team-10-project-WarZone
 
 Warzone Game Engine – C++ Project TEAM 10
 Description : 
