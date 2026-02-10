@@ -18,14 +18,14 @@ int main() {
     deck.returnCard(new Card(CardType::airlift));
     deck.returnCard(new Card(CardType::diplomacy));
     
-    cout << "Deck size after creation: " << deck.size() << std::endl;
+    cout << "Deck size after creation: " << deck.size() << endl;
 
     for (int i = 0; i < 5; i++) {
             Card* c = deck.draw();
                 hand.addCard(c);
         }
-    std::cout << "Deck size after drawing: " << deck.size() << std::endl;
-    std::cout << "Hand size after drawing: " << hand.size() << std::endl;
+    cout << "Deck size after drawing: " << deck.size() << endl;
+    cout << "Hand size after drawing: " << hand.size() << endl;
 
     while (hand.size() > 0) {
             Card* c = hand.getCards()->back();
@@ -33,8 +33,8 @@ int main() {
             c->play(nullptr, &deck);
         }
 
-        std::cout << "Hand size after playing: " << hand.size() << std::endl;
-        std::cout << "Deck size after returning: " << deck.size() << std::endl;
+        cout << "Hand size after playing: " << hand.size() << endl;
+        cout << "Deck size after returning: " << deck.size() << endl;
 
     
     return 0;
