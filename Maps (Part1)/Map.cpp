@@ -2,14 +2,20 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <queue> //verify the connectivity
 #include <sstream>
+#include <unordered_set>
+#include <utility>
 
 using namespace std;
 
-Map::Map(const std::string &mapFileName) {
+// ====== MAPLOADER =======
+
+MapLoader::MapLoader(const std::string &mapFileName) {
 	std::ifstream mapFile(mapFileName);
 	if (!mapFile.is_open()) {
-		std::cerr << "Error: Unable to open the file " << mapFileName << std::endl;
+		std::cerr << "Error: Unable to open the file " << mapFileName 
+			<< std::endl;
 		return;
 	}
 
@@ -34,7 +40,8 @@ Map::Map(const std::string &mapFileName) {
 		// Section detection
 		if (line[0] == '[' && line.back() == ']') {
 			currentSection = line.substr(1, line.size() - 2);
-			std::cout << "\n--- Start of section : [" << currentSection << "] ---" << std::endl;
+			std::cout << "\n--- Start of section : [" << currentSection
+					  << "] ---" << std::endl;
 			continue;
 		}
 
@@ -48,16 +55,19 @@ Map::Map(const std::string &mapFileName) {
 			Continent continent;
 			iss >> continent.name >> continent.army >> continent.color;
 			this->continents.push_back(std::make_unique<Continent>(continent));
-			std::cout << "Continent added : " << continent.name << " (army: " << continent.army << ", color: " << continent.color << ")" << std::endl;
-
+			std::cout << "Continent added : " << continent.name 
+					  << " (army: " << continent.army 
+					  << ", color: " << continent.color << ")" << std::endl;
 		} else if (currentSection == "countries") {
 			std::istringstream iss(line);
 			Country country;
 			iss >> country.id >> country.name >> country.continentNumber >>
 				country.x >> country.y;
 			this->countries.push_back(std::make_unique<Country>(country));
-			std::cout << "Country added : " << country.id << " - " << country.name << " (continent: " << country.continentNumber << ", contact details: " << country.x << ", " << country.y << ")" << std::endl;
-
+			std::cout << "Country added : " << country.id << " - " << country.name 
+				<< " (continent: " << country.continentNumber 
+				<< ", contact details: " << country.x << ", " << country.y 
+				<< ")" << std::endl;
 		} else if (currentSection == "borders") {
 			std::istringstream iss(line);
 			int countryId;
@@ -67,7 +77,7 @@ Map::Map(const std::string &mapFileName) {
 			while (iss >> neighborId) {
 				neighbors.push_back(neighborId);
 			}
-			this->countriesAdjGraph[countryId] = neighbors;
+			this->borders.insert(this->borders.end(), neighbors.begin(),neighbors.end());
 			std::cout << "Connections added for country ID " << countryId << " : ";
 			for (int neighbor : neighbors) {
 				std::cout << neighbor << " ";
@@ -80,24 +90,152 @@ Map::Map(const std::string &mapFileName) {
 	std::cout << "\nClosing the file. Loading complete." << std::endl;
 }
 
-void Map::display() {
-	// Print the continents
-	std::cout << "=== Continent(s) ===" << std::endl;
-	for (const auto &continent : continents) {
-		std::cout << "Name: " << continent->name
-				  << ", Army: " << continent->army
-				  << ", Colors: " << continent->color << std::endl;
+const std::vector<int> &MapLoader::getBorders() { return borders; }
+const std::vector<std::unique_ptr<Continent>> &MapLoader::getContinents() {
+	return continents;
+}
+const std::vector<std::unique_ptr<Country>> &MapLoader::getCountries() {
+	return countries;
+}
+
+//Copy constructor MapLoader
+MapLoader::MapLoader(const MapLoader &other) : 
+	files(other.files), borders(other.borders){
+	//Copy continents
+	for (const auto &continent : other.continents) {
+			continents.push_back(std::make_unique<Continent>(*continent));
+		}
+	//Copy countries
+	for (const auto &country : other.countries) {
+		countries.push_back(std::make_unique<Country>(*country));
+	}
+}
+
+//MapLoader assigment operator
+MapLoader &MapLoader::operator=(const MapLoader &other) {
+	if(this != &other){
+		files = other.files;
+		borders = other.borders;
+		continents.clear(); 
+		countries.clear();
+		//Deep copy continents
+		for (const auto &continent : other.continents) {
+			continents.push_back(std::make_unique<Continent>(*continent));
+		}
+		//Deep copy countries
+		for (const auto &country : other.countries) {
+			countries.push_back(std::make_unique<Country>(*country));
+		}
+	}
+	return *this;
+}
+
+//Insertion operator in a stream for MapLoader
+std::ostream &operator<<(std::ostream &os, const MapLoader &mapLoader) {
+	os << "=== MapLoader Summary ===" << std::endl;
+	os << "Files: ";
+	for (const auto &file : mapLoader.files) {
+		os << file << " ";
+	}
+	os << std::endl;
+
+	os << "Continents (" << mapLoader.continents.size() << "):" << std::endl;
+	for (const auto &continent : mapLoader.continents) {
+		os << "  - " << continent->name << " (Army: " << continent->army
+		   << ", Color: " << continent->color << ")" << std::endl;
 	}
 
-	// Print the countries
+	os << "Countries (" << mapLoader.countries.size() << "):" << std::endl;
+	for (const auto &country : mapLoader.countries) {
+		os << "  - " << country->id << ": " << country->name
+		   << " (Continent: " << country->continentNumber
+		   << ", Coords: " << country->x << ", " << country->y << ")"
+		   << std::endl;
+	}
+
+	os << "Borders (" << mapLoader.borders.size() << " entries):" << std::endl;
+	for (size_t i = 0; i < mapLoader.borders.size(); ++i) {
+		os << "  - " << mapLoader.borders[i] << " ";
+	}
+	os << std::endl;
+
+	return os;
+}
+
+// Printing of MapLoader
+void MapLoader::display() {
+	std::cout << "=== Continent(s) ===" << std::endl;
+	for (const auto &continent : continents) {
+		std::cout << "Nom: " << continent->name
+				  << ", Armée: " << continent->army
+				  << ", Couleur: " << continent->color << std::endl;
+	}
+
 	std::cout << "\n=== Pays ===" << std::endl;
 	for (const auto &country : countries) {
-		std::cout << "ID: " << country->id << ", Name: " << country->name
+		std::cout << "ID: " << country->id << ", Nom: " << country->name
 				  << ", Continent: " << country->continentNumber
-				  << ", Coordonates: (" << country->x << ", " << country->y
+				  << ", Coordonnées: (" << country->x << ", " << country->y
 				  << ")" << std::endl;
 	}
 
+	std::cout << "\n=== Frontières ===" << std::endl;
+	for (size_t i = 0; i < borders.size(); ++i) {
+		std::cout << borders[i] << " ";
+	}
+	std::cout << std::endl;
+}
+
+// ======== Map ========
+
+//Map Constructor
+Map::Map(std::unique_ptr<MapLoader> mapLoader) :
+	mapObjects(std::move(mapLoader)) {
+	// Construction of the adjacency graph from the boundaries
+	const std::vector<int> &borders = mapObjects->getBorders();
+	for (size_t i = 0; i < borders.size(); i += 2) {
+	    int country1 = borders[i];
+	    int country2 = borders[i + 1];
+	    countriesAdjGraph[country1].push_back(country2);
+	    countriesAdjGraph[country2].push_back(country1);
+	}
+}
+
+//Copy constructor
+Map::Map(const Map &other) :
+	mapObjects(std::make_unique<MapLoader>(*other.mapObjects)),
+	countriesAdjGraph(other.countriesAdjGraph) {}
+
+//Map assignement operator
+Map &Map::operator=(const Map &other) {
+	if (this != &other) {
+		mapObjects = std::make_unique<MapLoader>(*other.mapObjects);
+		countriesAdjGraph = other.countriesAdjGraph;
+	}
+	return *this;
+}
+
+// Insert operator in a stream for Map
+std::ostream &operator<<(std::ostream &os, const Map &map) {
+	os << "=== Map Summary ===" << std::endl;
+	os << *map.mapObjects << std::endl; // Print data of MapLoader
+
+	os << "Adjacency Graph (" << map.countriesAdjGraph.size()
+	   << " entries):" << std::endl;
+	for (const auto &[countryId, neighbors] : map.countriesAdjGraph) {
+		os << "  - Country ID " << countryId << " neighbors: ";
+		for (int neighborId : neighbors) {
+			os << neighborId << " ";
+		}
+		os << std::endl;
+	}
+
+	return os;
+}
+
+void Map::display() {
+	mapObjects->display(); //Print data of MapLoader
+	
 	// Print the connection between the countries
 	std::cout << "\n=== Connections ===" << std::endl;
 	for (const auto &[countryId, neighbors] : countriesAdjGraph) {
@@ -108,3 +246,34 @@ void Map::display() {
 		std::cout << std::endl;
 	}
 }
+
+// ====== CONNECTIVITY's GRAPH =====
+bool Map::isGraphConnected() {
+	if (countriesAdjGraph.empty()) {
+		return false;
+	}
+
+	std::queue<int> queue;
+	std::unordered_set<int> visited;
+	
+	int startCountry = countriesAdjGraph.begin()->first;
+	queue.push(startCountry);
+	visited.insert(startCountry);
+
+	while (!queue.empty()) {
+		int current = queue.front();
+		queue.pop();
+
+		for (int neighbor : countriesAdjGraph[current]) {
+			if (visited.find(neighbor) == visited.end()) {
+				visited.insert(neighbor);
+				queue.push(neighbor);
+			}
+		}
+	}
+	//Check all coutries has been visited
+	return visited.size() == countriesAdjGraph.size();
+}
+
+
+
