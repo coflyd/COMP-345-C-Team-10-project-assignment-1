@@ -1,53 +1,30 @@
-#ifndef PLAYER_H
-#define PLAYER_H
-
-#include <string>
+#pragma once
 #include <vector>
+#include <string>
+#include <iostream>
 #include "Map.h"
-
-class Order;
-class OrdersList;
-class Hand;
+#include "Orders.h"
 
 class Player {
 private:
-    std::string name;
-    std::vector<Country*> ownedTerritories;
-    Hand* hand;
+    std::string* name;
+    std::vector<Country*>* owned;
+    void* hand;
     OrdersList* orders;
 
 public:
-    Player(const std::string& name);
+    Player(const std::string& n);
+    Player(const Player& other);
+    Player& operator=(const Player& other);
     ~Player();
 
-    void addTerritory(Country* t);
-
+    void addCountry(Country* c);
     std::vector<Country*> toDefend();
     std::vector<Country*> toAttack();
-
     void issueOrder();
 
-    void displayOwnedTerritories() const;
+    OrdersList* getOrders() const;
+    std::string getName() const;
+
+    friend std::ostream& operator<<(std::ostream& out, const Player& p);
 };
-
-class Hand {
-public:
-    Hand() {}
-};
-
-class Order {
-public:
-    std::string description;
-    Order(const std::string& desc) : description(desc) {}
-};
-
-class OrdersList {
-private:
-    std::vector<Order*> orders;
-
-public:
-    void addOrder(Order* o);
-    void printOrders() const;
-};
-
-#endif

@@ -1,45 +1,26 @@
 #include "Player.h"
-#include "Map.h"
 #include <iostream>
 
-using namespace std;
-
 int main() {
-    // Ensuring Data folder and Map do exist
-    Map* europe = new Map("data/europe.map");
+    std::cout << "--- Player Driver ---\n";
 
-    Player* p1 = new Player("Alice");
+    Player p1("Amir");
+    Player p2 = p1;
 
-    cout << "\nAssigning territories to Alice..." << endl;
-    
-    // Use the should be implemented getter to access the list of countries
-    const auto& allCountries = europe->getCountries();
+    std::cout << p1 << std::endl;
+    std::cout << p2 << std::endl;
 
-    for (int i = 0; i < 3 && i < allCountries.size(); i++) {
-        p1->addTerritory(allCountries[i].get());
-    }
+    p1.issueOrder();
+    p1.issueOrder();
 
-    p1->displayOwnedTerritories();
+    std::cout << "Orders count: " << p1.getOrders()->size() << std::endl;
 
-    cout << "\n--- toDefend() ---" << endl;
-    auto defendList = p1->toDefend();
-    for (auto t : defendList) cout << "Defend: " << t->name << endl;
+    auto defend = p1.toDefend();
+    std::cout << "toDefend returned " << defend.size() << " countries\n";
 
-    cout << "\n--- toAttack() ---" << endl;
-    auto attackList = p1->toAttack();
-    for (auto t : attackList) cout << "Attack: " << t->name << endl;
+    auto attack = p1.toAttack();
+    std::cout << "toAttack returned " << attack.size() << " countries\n";
 
-    cout << "\n--- issueOrder() ---" << endl;
-    p1->issueOrder();
-    p1->issueOrder();
-    p1->issueOrder();
-
-    cout << "\n--- OrdersList ---" << endl;
-    p1->issueOrder();
-
-    // Clean up memory
-    delete europe;
-    delete p1;
-
+    std::cout << "Driver done.\n";
     return 0;
 }
