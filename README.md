@@ -10,12 +10,14 @@ Description: This project consists of implementing the fundamentals of the Warzo
 4. Cards (Tony Yacoub)
 5. Game engine (Sitong Guo)
 
-Reminder of instructions:
 
-°   Each component is implemented in .h/.cpp format and includes a corresponding driver file to demonstrate its functionality.
-°   All user-defined class data members must be of type pointer.
-°   All classes must implement a copy constructor, assignment operator, and correct stream insertion operator.
-°   Memory leaks must be avoided.
-°   The code must be documented using comments (user-defined classes, methods, free functions, operators).
-°   If you use third-party libraries that are not available in the labs and require configuration/installation, you cannot rely on assistance in using them and are entirely responsible for their correct installation for grading purposes.
-° The file submitted must be a .zip file containing all your C++ code
+
+Reminder of instructions (Member of the team):
+
+1. Each component is implemented in .h/.cpp format and includes a corresponding driver file to demonstrate its functionality.
+2. All user-defined class data members must be of type pointer.
+3. All classes must implement a copy constructor, assignment operator, and correct stream insertion operator.
+4. Memory leaks must be avoided.
+5. The code must be documented using comments (user-defined classes, methods, free functions, operators).
+6. If you use third-party libraries that are not available in the labs and require configuration/installation, you cannot rely on assistance in using them and are entirely responsible for their correct installation for grading purposes.
+7. The file submitted must be a .zip file containing all your C++ code
