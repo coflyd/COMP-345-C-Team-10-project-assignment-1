@@ -4,11 +4,11 @@ Warzone Game – TEAM 10
 Description : 
 Description: This project consists of implementing the fundamentals of the Warzone game engine in C++. The implementation follows an object-oriented design and is divided into five parts for the five main project members:
 
--> Map (Constance FLEURY)
--> Player (Amir Hossein Shiri Deh Piri)
--> Orders (Hamed Vasheghani Farahani)
--> Cards (Tony Yacoub)
--> Game engine (Sitong Guo). 
+1. Map (Constance FLEURY)
+2. Player (Amir Hossein Shiri Deh Piri)
+3. Orders (Hamed Vasheghani Farahani)
+4. Cards (Tony Yacoub)
+5. Game engine (Sitong Guo)
 
 Reminder of instructions:
 
