@@ -10,6 +10,7 @@
 
 using namespace std;
 
+
 // ======== PLAYER ========
 Player::Player(const int id, const std::string pseudo) {
 	this->id = id;
