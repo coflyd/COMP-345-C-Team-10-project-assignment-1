@@ -7,6 +7,16 @@
 #include <vector>
 #include <memory>
 
+class Player {
+private:
+	int id;
+	std::string pseudo;
+
+public:
+	Player(const int id, const std::string pseudo);
+	int getId() const;
+	const std::string& getPseudo() const;
+};
 
 struct Continent {
 	int id;
@@ -21,6 +31,8 @@ struct Country {
 	int continentNumber;
 	int x;
 	int y;
+	Player *player;
+	std::vector<int> armies;
 };
 
 class MapLoader {
@@ -38,28 +50,32 @@ public :
 	const std::vector<std::unique_ptr<Country>> &getCountries();
 
 	MapLoader(const MapLoader &other);
-	MapLoader &operator=(const MapLoader &other);
+	MapLoader& operator=(const MapLoader &other);
 	friend std::ostream& operator<<(std::ostream &os, const MapLoader &map);
 	void display();
 };
 
 class Map {
 private:
-	std::unique_ptr<MapLoader> mapObjects;
+	std::vector<std::unique_ptr<Continent>> continents;
 	std::map<int, std::unique_ptr<Country>> countryNode;
 	std::map<int, std::vector<int>> neighboursEdge;
 
 public:
 	Map(std::unique_ptr<MapLoader> mapObjects);
 	Map(const Map &other);
-	Map &operator=(const Map &other);
-	friend std::ostream &operator<<(std::ostream &os, const Map &map);
+	Map& operator=(const Map &other);
+	friend std::ostream& operator<<(std::ostream &os, const Map &map);
 	void display();
+	bool validate();
 	bool isGraphConnected();
 	static bool isThisGraphConnected(
 			const std::map<int, std::unique_ptr<Country>> &nodes,
 			const std::map<int, std::vector<int>> &edges);
-	bool isContinentsSubGraphsConnected();
+	bool isEachContinentIsGraphsConnected();
+	bool isEachCountryBelongsToOneAndOnlyOneContinent();
+	void initialCountryDistribution(
+			std::vector<std::unique_ptr<Player>> &players);
 };
 
 #endif /* MAP_H_ */
