@@ -39,6 +39,7 @@ MapLoader::MapLoader(const std::string &mapFileName) {
 
 	std::string line;
 	std::string currentSection;
+	//int continent_number = 1;
 
 	while (getline(mapFile, line)) {
 		if (!line.empty() && line.back() == '\r') {
@@ -338,7 +339,7 @@ bool Map::isGraphConnected() {
 	}
 	
 	//Check all coutries has been visited
-	return visited.size() == neighboursEdge.size();
+	return visited.size() == neighboursEdge.size(); //visited.size() == countryNode.size();
 }
 
 // ====== CONNECTIVITY's SUBGRAPH =====
@@ -474,4 +475,22 @@ void Map::initialCountryDistribution(
 		i++;
 	}
 
+}
+
+void Map::initialRandomCountryDistribution(
+		std::vector<std::unique_ptr<Player>> &players) {
+	int i;
+	int nbPlayers = players.size();
+	int nbCountries = this->countryNode.size();
+	std::vector<int> countryBag;
+	for (i = 1; i <= nbCountries; i++) {
+		countryBag.push_back(i);
+	}
+	i = 0;
+	std::shuffle(countryBag.begin(), countryBag.end(), std::mt19937 {
+			std::random_device { }() });
+	for (const int idCountry : countryBag) {
+		this->countryNode[idCountry]->player = players[i % nbPlayers].get();
+		i++;
+	}
 }
