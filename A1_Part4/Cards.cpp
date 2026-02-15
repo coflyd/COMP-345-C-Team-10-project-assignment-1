@@ -1,120 +1,166 @@
 #include "Cards.h"
+#include "Player.h"
+#include "Orders.h"
+
 using namespace std;
 
-Card:: Card(){
-    type=CardType::bomb;
-}
-Card::Card(CardType t){
-    type=t;
- }
- Card::Card(const Card& other){
-     type=other.type;
- }
- Card& Card::operator=(const Card& other){
-     if(this !=&other){
-         type=other.type;
-     }
-     return *this;
- }
- Card::~Card(){
 
- }
-void Card:: play(Player* player, Deck* deck){
-    if (deck == nullptr) return;
-            deck->returnCard(this);
-}
- CardType Card::getType() const{
-     return type;
- }
-
-
-
-Deck::Deck(){
-    cards=new vector<Card*>();
+Card::Card() {
+    type = CardType::bomb;
 }
 
-Deck::Deck(const Deck& other){
-    cards= new vector<Card*>;
-    for (Card* c: *other.cards){
+Card::Card(CardType t) {
+    type = t;
+}
+
+Card::Card(const Card& other) {
+    type = other.type;
+}
+
+Card& Card::operator=(const Card& other) {
+    if (this != &other) {
+        type = other.type;
+    }
+    return *this;
+}
+
+// Has no pointers to delete so it stays empty
+Card::~Card() {}
+
+void Card::play(Player* player, Deck* deck) {
+    if (player == nullptr || deck == nullptr) return;
+    
+//  Initilaizing the Order for play function
+    Order* o = nullptr;
+
+    switch (type) {
+            
+// Passing dummy values depending on the type of the card to have the correct order type
+        case CardType::reinforcement:
+            o = new Deploy("TerritoryA", 5);
+            break;
+        case CardType::bomb:
+            o = new Bomb("TerritoryB");
+            break;
+        case CardType::blockade:
+            o = new Blockade("TerritoryC");
+            break;
+        case CardType::airlift:
+            o = new Airlift("TerritoryA", "TerritoryB", 5);
+            break;
+        case CardType::diplomacy:
+            o = new Negotiate(player->getName(), "Enemy");
+            break;
+    }
+    
+//  Adding the new order we just made to the player's list
+    player->getOrders()->add(o);
+    
+// Removes the card from the player's hand
+    player->getHand()->removeCard(this);
+    
+// Returning the card to the deck
+    deck->returnCard(this);
+}
+
+CardType Card::getType() const {
+    return type;
+}
+
+// Prints the correct card type instead of printing the number it is inside the enum
+ostream& operator<<(ostream& out, const Card& card) {
+    switch (card.type) {
+        case CardType::bomb: out << "Bomb"; break;
+        case CardType::reinforcement: out << "Reinforcement"; break;
+        case CardType::blockade: out << "Blockade"; break;
+        case CardType::airlift: out << "Airlift"; break;
+        case CardType::diplomacy: out << "Diplomacy"; break;
+    }
+    return out;
+}
+
+// For my Deck copy constructers, they are deep copies since the deck owns the cards
+// and is not just referencing them or holding them
+Deck::Deck() {
+    cards = new vector<Card*>();
+}
+
+// Makes a deep copy of the Deck
+Deck::Deck(const Deck& other) {
+    cards = new vector<Card*>();
+    for (Card* c : *other.cards) {
         cards->push_back(new Card(*c));
     }
 }
-
-Deck& Deck::operator=(const Deck& other){
+// Creates a deep copy
+Deck& Deck::operator=(const Deck& other) {
     if (this != &other) {
-        for (Card* c : *cards) {
-            delete c;
-        }
+        for (Card* c : *cards) delete c;
         cards->clear();
-        for (Card* c : *other.cards){
+        for (Card* c : *other.cards) {
             cards->push_back(new Card(*c));
         }
     }
     return *this;
 }
-Deck::~Deck(){
-    for (Card* c: *cards){
-        delete c;
-    }
+
+Deck::~Deck() {
+    for (Card* c : *cards) delete c;
     delete cards;
 }
-
-Card* Deck::draw(){
+//  Returns the top card from the deck, which is the last element in the vector
+Card* Deck::draw() {
     if (cards->empty()) return nullptr;
+    Card* c = cards->back();
+    cards->pop_back();
+    return c;
+}
 
-        Card* top = cards->back();
-        cards->pop_back();
-            return top;
+// Returns the card to the bottom of the deck, first element in vector
+void Deck::returnCard(Card* card) {
+    if (card != nullptr) cards->insert(cards->begin(), card);
 }
-void Deck::returnCard(Card* card){
-    cards->push_back(card);
-}
-int Deck::size()const{
+
+int Deck::size() const {
     return cards->size();
 }
 
-
-
-
-
-Hand::Hand(){
-    cards=new vector<Card*>();
-
+ostream& operator<<(ostream& out, const Deck& deck) {
+    out << "Deck(" << deck.size() << ")";
+    return out;
 }
-Hand::Hand(const Hand& other){
-    cards = new std::vector<Card*>();
-        for (Card* c : *other.cards) {
-            cards->push_back(new Card(*c));
-        }
+
+// For my Hand copy constructers, they are shallow copies since the deck owns the cards
+// and the hand is just temporarily holding the cards
+Hand::Hand() {
+    cards = new vector<Card*>();
 }
-Hand& Hand::operator=(const Hand& other){
+// Creates a different vector of hands that points to the same cards
+Hand::Hand(const Hand& other) {
+    cards = new vector<Card*>();
+    for (Card* c : *other.cards) cards->push_back(c);
+}
+// Creates a shallow copy
+Hand& Hand::operator=(const Hand& other) {
     if (this != &other) {
-            for (Card* c : *cards) {
-                delete c;
-            }
-            cards->clear();
-
-            for (Card* c : *other.cards) {
-                cards->push_back(new Card(*c));
-            }
-        }
-        return *this;
-}
-Hand::~Hand(){
-    for (Card* c : *cards) {
-            delete c;
-        }
-        delete cards;
+        cards->clear();
+        for (Card* c : *other.cards) cards->push_back(c);
+    }
+    return *this;
 }
 
-void Hand::addCard(Card* card){
-    if (card == nullptr) return;
-        cards->push_back(card);
+Hand::~Hand() {
+    delete cards;
 }
-bool Hand::removeCard(Card* card){
+// Adds the card to the top of the hand, the last element of the vector
+void Hand::addCard(Card* card) {
+    if (card != nullptr) cards->push_back(card);
+}
+
+//  Removes a certain card from the hand
+bool Hand::removeCard(Card* card) {
     if (card == nullptr) return false;
-    
-    for (auto it = cards->begin(); it != cards->end(); it++) {
+    for (auto it = cards->begin(); it != cards->end(); ++it) {
         if (*it == card) {
             cards->erase(it);
             return true;
@@ -122,11 +168,17 @@ bool Hand::removeCard(Card* card){
     }
     return false;
 }
+
+int Hand::size() const {
+    return cards->size();
+}
+
 const vector<Card*>* Hand::getCards() const {
     return cards;
 }
 
-int Hand::size() const{
-    return cards->size();
+ostream& operator<<(ostream& out, const Hand& hand) {
+    out << "Hand(" << hand.size() << "): ";
+    for (Card* c : *hand.cards) out << *c << " ";
+    return out;
 }
-
