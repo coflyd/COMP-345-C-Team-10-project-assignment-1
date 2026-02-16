@@ -137,14 +137,22 @@ GameEngine::~GameEngine() {
 bool GameEngine::validate(const std::string& cmd) {
     std::string state = currentState->getName();
     if (state == "start" && cmd == "loadmap") return true;
+    if (state == "maploaded" && cmd == "loadmap") return true;  
     if (state == "maploaded" && cmd == "validatemap") return true;
     if (state == "mapvalidated" && cmd == "addplayer") return true;
+    if (state == "playersadded" && cmd == "addplayer") return true;  
     if (state == "playersadded" && cmd == "assigncountries") return true;
+
     if (state == "assignreinforcement" && cmd == "issueorder") return true;
+    if (state == "issueorders" && cmd == "issueorder") return true;  
     if (state == "issueorders" && cmd == "endissueorders") return true;
+    if (state == "executeorders" && cmd == "execorder") return true;  
     if (state == "executeorders" && cmd == "endexecorders") return true;
     if (state == "executeorders" && cmd == "win") return true;
+    
     if (state == "win" && cmd == "play") return true;
+    if (state == "win" && cmd == "end") return true;
+   
     if (cmd == "end") return true;
     return false;
 }
@@ -161,25 +169,31 @@ void GameEngine::transition(const std::string& cmd) {
         newCommand->saveEffect("Rejected");
         return;
     }
-    std::string state = currentState->getName();
-    if (cmd == "loadmap")
+    State* oldState = currentState;
+    if (cmd == "loadmap") {
         currentState = new State("maploaded");
-    else if (cmd == "validatemap")
+    } else if (cmd == "validatemap") {
         currentState = new State("mapvalidated");
-    else if (cmd == "addplayer")
+    } else if (cmd == "addplayer") {
         currentState = new State("playersadded");
-    else if (cmd == "assigncountries")
+    } else if (cmd == "assigncountries") {
         currentState = new State("assignreinforcement");
-    else if (cmd == "issueorder")
+    } else if (cmd == "issueorder") {
         currentState = new State("issueorders");
-    else if (cmd == "endissueorders")
+    } else if (cmd == "endissueorders") {
         currentState = new State("executeorders");
-    else if (cmd == "win")
+    } else if (cmd == "execorder") {
+        currentState = new State("executeorders");
+    } else if (cmd == "endexecorders") {
+        currentState = new State("assignreinforcement");
+    } else if (cmd == "win") {
         currentState = new State("win");
-    else if (cmd == "play")
+    } else if (cmd == "play") {
         currentState = new State("start");
-    else if (cmd == "end")
+    } else if (cmd == "end") {
         currentState = new State("end");
+    }
+    delete oldState;
     newCommand->saveEffect("Transitioned to " + currentState->getName());
 }
 
