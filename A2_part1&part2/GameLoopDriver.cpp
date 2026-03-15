@@ -74,7 +74,7 @@ int main() {
  
 	std::cout << "\n=== 3 and 4: Advance orders + Card play ===\n\n";
 	{
-		MapLoader loader("data/solar.map");
+		MapLoader loader("data/europe.map");
 		Map map(&loader);
 
 		Player *alice = new Player("Alice");
