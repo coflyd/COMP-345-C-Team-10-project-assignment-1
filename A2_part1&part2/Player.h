@@ -14,6 +14,8 @@ private:
 	OrdersList* orders;             // Player's list of orders
 	int reinforcementPool;          // Pool of armies to be deployed
 	bool doneIssuing;               // Part 3 tracks if player is done issuing this turn
+	std::vector<std::string> trucePlayers; // Part 4 stores active truces for this turn
+	bool conqueredThisTurn = false;        // Part 4 tracks if player captured a territory this turn
 
 public:
 	// Constructors and destructor
@@ -38,7 +40,16 @@ public:
 	bool isDoneIssuing() const;         // Part 3
 	void setDoneIssuing(bool done);     // Part 3
 	const std::vector<Country*>& getOwnedCountries() const;
+	int getReinforcements() const;      // Part 4
+	void setReinforcements(int amount); // Part 4
 
 	// Stream insertion operator
 	friend std::ostream& operator<<(std::ostream& out, const Player& p);
+
+	// Functions used by Part 4
+	bool hasConqueredThisTurn() const;
+	void setConqueredThisTurn(bool val);
+	bool isTruceWith(const std::string& playerName) const;
+	void addTruce(const std::string& playerName);
+	void clearTruces();
 };
