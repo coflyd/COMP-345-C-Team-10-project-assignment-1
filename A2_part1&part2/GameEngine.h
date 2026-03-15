@@ -10,12 +10,12 @@
 #include "Player.h"
 
 struct WarZone {
-	Map *map;
+	Map* map;
 	std::vector<Player*> players;
-	OrdersList *ol;
-	Deck *deck;
+	OrdersList* ol;
+	Deck* deck;
 	WarZone();
-	WarZone(const WarZone &other);
+	WarZone(const WarZone& other);
 	~WarZone();
 };
 
@@ -26,14 +26,14 @@ private:
 public:
 	static const std::array<std::string, 8> allowedStates;
 
-	State(const std::string &n);
-	State(const State &other);
-	State& operator=(const State &other);
+	State(const std::string& n);
+	State(const State& other);
+	State& operator=(const State& other);
 	~State() = default;
 
 	std::string getName() const;
 
-	friend std::ostream& operator<<(std::ostream &os, const State &s);
+	friend std::ostream& operator<<(std::ostream& os, const State& s);
 };
 
 class Command {
@@ -44,16 +44,16 @@ private:
 public:
 	static const std::array<std::string, 10> allowedCommands;
 
-	Command(const std::string &cmdType);
-	Command(const Command &other);
-	Command& operator=(const Command &other);
+	Command(const std::string& cmdType);
+	Command(const Command& other);
+	Command& operator=(const Command& other);
 	~Command() = default;
 
 	std::string getType() const;
 	std::string getEffect() const;
-	void saveEffect(const std::string &e);
+	void saveEffect(const std::string& e);
 
-	friend std::ostream& operator<<(std::ostream &os, const Command &c);
+	friend std::ostream& operator<<(std::ostream& os, const Command& c);
 };
 
 class CommandProcessor;
@@ -63,19 +63,22 @@ private:
 	static const std::string MAPS_DIRECTORY;
 	State currentState;
 	std::map<std::pair<std::string, std::string>, std::string> transitions;
-	WarZone *warZone;
+	WarZone* warZone;
+
 public:
-	CommandProcessor *commandProcessor;
+	CommandProcessor* commandProcessor;
+
 	GameEngine();
-	GameEngine(const GameEngine &other);
-	GameEngine& operator=(const GameEngine &other);
+	GameEngine(const GameEngine& other);
+	GameEngine& operator=(const GameEngine& other);
 	~GameEngine();
 
-	void setCommandProcessor(CommandProcessor *processor);
-	void transition(const std::string &commandType);
+	// Parts 1 & 2
+	void setCommandProcessor(CommandProcessor* processor);
+	void transition(const std::string& commandType);
 	State getCurrentState() const;
 	CommandProcessor* getCommandProcessor() const;
-	bool isValidTransition(const std::string &commandType) const;
+	bool isValidTransition(const std::string& commandType) const;
 	void startupPhase();
 	void loadmap();
 	void validatemap();
@@ -85,30 +88,39 @@ public:
 	void createInitialDeck(int bo, int bl, int ai, int di, int re, int te);
 	void displayOwnedCountries();
 	void drawInitialCards(int nbCards);
-	friend std::ostream& operator<<(std::ostream &os, const GameEngine &ge);
+
+	// Part 3 main game loop
+	void mainGameLoop();
+	void reinforcementPhase();
+	void issueOrdersPhase();
+	void executeOrdersPhase();
+	bool checkWinCondition(Player*& winner) const;
+	void removeDefeatedPlayers();
+
+	friend std::ostream& operator<<(std::ostream& os, const GameEngine& ge);
 };
 
 class CommandProcessor {
 private:
 	std::vector<Command*> commands;
-	GameEngine *gameEngine;
+	GameEngine* gameEngine;
 	virtual void readCommand();
 public:
 	CommandProcessor();
-	CommandProcessor(GameEngine *engine);
-	CommandProcessor(const CommandProcessor &other);
-	CommandProcessor& operator=(const CommandProcessor &other);
+	CommandProcessor(GameEngine* engine);
+	CommandProcessor(const CommandProcessor& other);
+	CommandProcessor& operator=(const CommandProcessor& other);
 	virtual ~CommandProcessor();
 
-	bool saveCommand(const std::string &commandType);
+	bool saveCommand(const std::string& commandType);
 	virtual std::string getCommandFromConsole();
 	Command* getCommand();
-	bool validate(const std::string &commandType,
-			const State &currentState) const;
+	bool validate(const std::string& commandType,
+		const State& currentState) const;
 	const std::vector<Command*>& getCommands() const;
 
-	friend std::ostream& operator<<(std::ostream &os,
-			const CommandProcessor &cp);
+	friend std::ostream& operator<<(std::ostream& os,
+		const CommandProcessor& cp);
 };
 
 class FileLineReader {
@@ -116,19 +128,19 @@ private:
 	std::ifstream file;
 
 public:
-	FileLineReader(const std::string &filename);
+	FileLineReader(const std::string& filename);
 	~FileLineReader();
 
 	std::string readLine();
 	const std::ifstream& getFile() const;
 };
 
-class FileCommandProcessorAdapter: public CommandProcessor {
+class FileCommandProcessorAdapter : public CommandProcessor {
 private:
-	FileLineReader *fileReader;
+	FileLineReader* fileReader;
 	void readCommand() override;
 public:
-	FileCommandProcessorAdapter(const std::string &filename);
+	FileCommandProcessorAdapter(const std::string& filename);
 	~FileCommandProcessorAdapter();
 	std::string getCommandFromConsole() override;
 	bool hasMoreCommands() const;
