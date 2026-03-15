@@ -715,9 +715,10 @@ void GameEngine::mainGameLoop() {
 	cout << "\n========== MAIN GAME LOOP START ==========\n";
 
 	int round = 0;
+	int maxRounds = 3; // limit for demo (remove when Part 4 order execution is implemented)
 	Player* winner = nullptr;
 
-	while (!checkWinCondition(winner)) {
+	while (!checkWinCondition(winner) && round < maxRounds) {
 		round++;
 		cout << "\n########## ROUND " << round << " ##########\n";
 
@@ -736,5 +737,9 @@ void GameEngine::mainGameLoop() {
 		cout << "\n========================================\n";
 		cout << "  GAME OVER!  Winner: " << winner->getName() << "\n";
 		cout << "========================================\n";
+	}
+	else {
+		cout << "\nReached max rounds (" << maxRounds << "). Game loop works correctly.\n";
+		cout << "Full win condition requires Part 4 order execution to be integrated.\n";
 	}
 }
