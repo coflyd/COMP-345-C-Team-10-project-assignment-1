@@ -8,6 +8,7 @@ Player::Player(const std::string& n) {
 	orders = new OrdersList();
 	reinforcementPool = 0;
 	doneIssuing = false; // Part 3
+	conqueredThisTurn = false; // Part 4
 }
 
 // Copy constructor: creates a deep copy of another player
@@ -20,6 +21,8 @@ Player::Player(const Player& other) {
 	orders = new OrdersList(*other.orders);
 	reinforcementPool = other.reinforcementPool;
 	doneIssuing = other.doneIssuing; // Part 3
+	conqueredThisTurn = other.conqueredThisTurn; // Part 4
+	trucePlayers = other.trucePlayers; // Part 4
 }
 
 // Assignment operator: deep copy with cleanup of existing data
@@ -43,6 +46,8 @@ Player& Player::operator=(const Player& other) {
 	orders = new OrdersList(*other.orders);
 	reinforcementPool = other.reinforcementPool;
 	doneIssuing = other.doneIssuing; // Part 3
+	conqueredThisTurn = other.conqueredThisTurn; // Part 4
+	trucePlayers = other.trucePlayers; // Part 4
 	return *this;
 }
 
@@ -64,13 +69,11 @@ void Player::removeCountry(Country* c) {
 	owned.erase(std::remove(owned.begin(), owned.end(), c), owned.end());
 }
 
-// Returns list of territories to defend (weakest first — fewest armies)
+// Returns list of territories to defend (weakest first - fewest armies)
 std::vector<Country*> Player::toDefend() {
 	std::vector<Country*> defend = owned;
 	std::sort(defend.begin(), defend.end(), [](Country* a, Country* b) {
-		int armA = a->armies.empty() ? 0 : a->armies[0];
-		int armB = b->armies.empty() ? 0 : b->armies[0];
-		return armA < armB;
+		return a->armies < b->armies;
 		});
 	return defend;
 }
@@ -105,10 +108,7 @@ void Player::issueOrder(Map* map, std::vector<Player*>& allPlayers, Deck* deck) 
 			int armiesToDeploy = reinforcementPool;
 
 			// Add armies to territory
-			if (target->armies.empty())
-				target->armies.push_back(armiesToDeploy);
-			else
-				target->armies[0] += armiesToDeploy;
+			target->armies += armiesToDeploy;
 
 			orders->add(new Deploy(target->name, armiesToDeploy));
 			std::cout << "[" << *name << "] Deploy order: "
@@ -125,7 +125,7 @@ void Player::issueOrder(Map* map, std::vector<Player*>& allPlayers, Deck* deck) 
 	if (defend.size() >= 2) {
 		Country* weakest = defend[0];
 		Country* strongest = defend[defend.size() - 1];
-		int available = strongest->armies.empty() ? 0 : strongest->armies[0];
+		int available = strongest->armies;
 		if (available > 1) {
 			int toMove = available / 2;
 			orders->add(new Advance(strongest->name, weakest->name, toMove));
@@ -142,7 +142,7 @@ void Player::issueOrder(Map* map, std::vector<Player*>& allPlayers, Deck* deck) 
 		Country* source = nullptr;
 		int maxArmies = 0;
 		for (Country* mine : owned) {
-			int armies = mine->armies.empty() ? 0 : mine->armies[0];
+			int armies = mine->armies;
 			if (armies > maxArmies) {
 				maxArmies = armies;
 				source = mine;
@@ -214,3 +214,15 @@ std::ostream& operator<<(std::ostream& out, const Player& p) {
 		<< " | Reinforcements: " << p.reinforcementPool;
 	return out;
 }
+
+// Part 4 additions
+int Player::getReinforcements() const { return reinforcementPool; }
+void Player::setReinforcements(int amount) { reinforcementPool = amount; }
+bool Player::hasConqueredThisTurn() const { return conqueredThisTurn; }
+void Player::setConqueredThisTurn(bool val) { conqueredThisTurn = val; }
+bool Player::isTruceWith(const std::string& p) const {
+	for (const std::string& t : trucePlayers) if (t == p) return true;
+	return false;
+}
+void Player::addTruce(const std::string& p) { trucePlayers.push_back(p); }
+void Player::clearTruces() { trucePlayers.clear(); }
