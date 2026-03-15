@@ -37,45 +37,6 @@ std::ostream& operator<<(std::ostream& os, const State& s) {
 	return os;
 }
 
-// Command
-
-const std::array<std::string, 10> Command::allowedCommands = { "loadmap",
-		"validatemap", "addplayer", "gamestart", "issueorder", "endissueorders",
-		"execorder", "win", "play", "end" };
-
-Command::Command(const std::string& cmdType) :
-	type(cmdType), effect("") {
-}
-
-Command::Command(const Command& other) :
-	type(other.type), effect(other.effect) {
-}
-
-Command& Command::operator=(const Command& other) {
-	if (this != &other) {
-		type = other.type;
-		effect = other.effect;
-	}
-	return *this;
-}
-
-std::string Command::getType() const {
-	return type;
-}
-
-std::string Command::getEffect() const {
-	return effect;
-}
-
-void Command::saveEffect(const std::string& e) {
-	effect = e;
-}
-
-std::ostream& operator<<(std::ostream& os, const Command& c) {
-	os << "Command: " << c.type << " | Effect: " << c.effect;
-	return os;
-}
-
 // WarZone
 
 WarZone::WarZone() :
@@ -186,15 +147,11 @@ void GameEngine::transition(const std::string& commandType) {
 			cout << "Executing play command" << endl;
 		}
 
-		if (commandProcessor->saveCommand(commandType)) {
-			currentState = State(it->second);
-			commandProcessor->getCommand()->saveEffect(
-				"Transitioned to " + it->second);
-		}
-	}
-	else {
-		std::cout << "Invalid transition for current state.\n";
-	}
+	commandProcessor->saveCommand(commandType);       
+    currentState = State(it->second);
+    commandProcessor->getCommand()->saveEffect(
+        "Transitioned to " + it->second);
+    cout << "State -> " << currentState << "\n";}
 }
 
 State GameEngine::getCurrentState() const {
@@ -387,179 +344,6 @@ void GameEngine::drawInitialCards(int nbCards) {
 	}
 }
 
-// CommandProcessor
-
-CommandProcessor::CommandProcessor() :
-	gameEngine(nullptr) {
-}
-
-CommandProcessor::CommandProcessor(GameEngine* engine) :
-	gameEngine(engine) {
-	cout << "Command processor created" << endl;
-}
-
-CommandProcessor::CommandProcessor(const CommandProcessor& other) :
-	gameEngine(other.gameEngine) {
-	for (Command* cmd : other.commands) {
-		commands.push_back(new Command(*cmd));
-	}
-}
-
-CommandProcessor& CommandProcessor::operator=(const CommandProcessor& other) {
-	if (this != &other) {
-		gameEngine = other.gameEngine;
-		for (Command* cmd : commands) {
-			delete cmd;
-		}
-		commands.clear();
-		for (Command* cmd : other.commands) {
-			commands.push_back(new Command(*cmd));
-		}
-	}
-	return *this;
-}
-
-CommandProcessor::~CommandProcessor() {
-	for (Command* cmd : commands) {
-		delete cmd;
-	}
-}
-
-void CommandProcessor::readCommand() {
-	std::string inputCommand;
-	std::cout << "Enter command: ";
-	std::getline(std::cin, inputCommand);
-	if (inputCommand.empty()) {
-		return;
-	}
-	if (std::find(Command::allowedCommands.begin(),
-		Command::allowedCommands.end(), inputCommand)
-		== Command::allowedCommands.end()) {
-		std::cout << "\nInvalid command: " << inputCommand << ", try again.\n";
-	}
-	else {
-		this->saveCommand(inputCommand);
-	}
-}
-
-bool CommandProcessor::saveCommand(const std::string& commandType) {
-	if (std::find(Command::allowedCommands.begin(),
-		Command::allowedCommands.end(), commandType)
-		!= Command::allowedCommands.end()) {
-		commands.push_back(new Command(commandType));
-		return true;
-	}
-	return false;
-}
-
-Command* CommandProcessor::getCommand() {
-	if (!commands.empty()) {
-		return commands.back();
-	}
-	return nullptr;
-}
-
-std::string CommandProcessor::getCommandFromConsole() {
-	readCommand();
-	if (!commands.empty()) {
-		return commands.back()->getType();
-	}
-	return "";
-}
-
-bool CommandProcessor::validate(const std::string& commandType,
-	const State& currentState) const {
-	if (std::find(Command::allowedCommands.begin(),
-		Command::allowedCommands.end(), commandType)
-		== Command::allowedCommands.end()) {
-		return false;
-	}
-	if (gameEngine != nullptr && !gameEngine->isValidTransition(commandType)) {
-		return false;
-	}
-	return true;
-}
-
-const std::vector<Command*>& CommandProcessor::getCommands() const {
-	return commands;
-}
-
-std::ostream& operator<<(std::ostream& os, const CommandProcessor& cp) {
-	os << "CommandProcessor history:\n";
-	for (Command* c : cp.commands) {
-		os << *c << "\n";
-	}
-	return os;
-}
-
-// FileLineReader
-
-FileLineReader::FileLineReader(const std::string& filename) {
-	file.open(filename);
-	if (!file.is_open()) {
-		throw std::runtime_error(
-			"Impossible d'ouvrir le fichier : " + filename);
-	}
-}
-
-FileLineReader::~FileLineReader() {
-	if (file.is_open()) {
-		file.close();
-	}
-}
-
-std::string FileLineReader::readLine() {
-	std::string line;
-	if (std::getline(file, line)) {
-		return line;
-	}
-	return "";
-}
-
-const std::ifstream& FileLineReader::getFile() const {
-	return file;
-}
-
-// FileCommandProcessorAdapter
-
-FileCommandProcessorAdapter::FileCommandProcessorAdapter(
-	const std::string& filename) :
-	CommandProcessor(), fileReader(new FileLineReader(filename)) {
-}
-
-FileCommandProcessorAdapter::~FileCommandProcessorAdapter() {
-	delete fileReader;
-}
-
-void FileCommandProcessorAdapter::readCommand() {
-	std::string line = fileReader->readLine();
-	if (!line.empty()) {
-		saveCommand(line);
-	}
-}
-
-std::string FileCommandProcessorAdapter::getCommandFromConsole() {
-	std::string line;
-	while (hasMoreCommands()) {
-		line = fileReader->readLine();
-		if (line.empty()) {
-			continue;
-		}
-		if (std::find(Command::allowedCommands.begin(),
-			Command::allowedCommands.end(), line)
-			!= Command::allowedCommands.end()) {
-			saveCommand(line);
-			return line;
-		}
-		std::cout << "Ignoring invalid command: " << line << std::endl;
-	}
-	return "";
-}
-
-bool FileCommandProcessorAdapter::hasMoreCommands() const {
-	return !fileReader->getFile().eof();
-}
-
 // PART 3 Main Game Loop
 
 // Checks if one player owns all territories. Sets winner if so.
@@ -600,8 +384,7 @@ void GameEngine::reinforcementPhase() {
 
 	int total = warZone->map->getCountriesNumber();
 
-	// Build map: continentId -> list of country ids in that continent
-	map<int, vector<int>> continentCountries;
+	map<int, vector<int> > continentCountries;
 	for (int i = 1; i <= total; i++) {
 		Country* c = warZone->map->getCountryById(i);
 		if (c) {
@@ -644,7 +427,6 @@ void GameEngine::reinforcementPhase() {
 void GameEngine::issueOrdersPhase() {
 	cout << "\n========== ISSUE ORDERS PHASE ==========\n";
 
-	// Reset doneIssuing for all players
 	for (Player* p : warZone->players) {
 		p->setDoneIssuing(false);
 	}
@@ -665,8 +447,8 @@ void GameEngine::issueOrdersPhase() {
 }
 
 // Execute Orders Phase:
-// Step 1 — execute ALL Deploy orders first (round-robin across players)
-// Step 2 — execute all remaining orders (round-robin across players)
+// Step 1 execute ALL Deploy orders first (round-robin across players)
+// Step 2 execute all remaining orders (round-robin across players)
 void GameEngine::executeOrdersPhase() {
 	cout << "\n========== EXECUTE ORDERS PHASE ==========\n";
 
