@@ -5,13 +5,13 @@ This is our C++ implementation of the Warzone strategy game, developed as a team
 
 ## Team Members
 
-| Name | Component |
-|------|-----------|
-| Amir Hossein Shiri Deh Piri | Map & Map Loader |
-| Constance Fleury | Player & Orders |
-| Hamed Vasheghani Farahani | Game Engine & Startup Phase |
-| Tony Yacoub | Cards & Logging Observer |
-| Sitong Guo | Command Processing & Strategy |
+| Name |
+|------|
+| Amir Hossein Shiri Deh Piri |
+| Constance Fleury |
+| Hamed Vasheghani Farahani |
+| Tony Yacoub |
+| Sitong Guo |
 
 
 ## What This Project Is
