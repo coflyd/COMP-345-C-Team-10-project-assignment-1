@@ -37,7 +37,7 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const State& s);
 };
 
-// TournamentConfig: parameters for Assignment 3 Part 2 tournament mode
+// PART 2 ASSIGNMENT 3: tournament parameters
 struct TournamentConfig {
     std::vector<std::string> maps;       // M: 1-5 map file paths
     std::vector<std::string> strategies; // P: 2-4 strategy names
@@ -85,7 +85,7 @@ public:
     bool checkWinCondition(Player*& winner) const;
     void removeDefeatedPlayers();
 
-    // Part 2 Assignment 3: Tournament Mode
+    // PART 2 ASSIGNMENT 3: Tournament Mode
     void tournamentMode(const TournamentConfig& config);
 
     friend std::ostream& operator<<(std::ostream& os, const GameEngine& ge);

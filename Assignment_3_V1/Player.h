@@ -17,12 +17,14 @@ private:
     int reinforcementPool;                 // Pool of armies to be deployed
     bool doneIssuing;                      // Tracks if player is done issuing this turn
     std::vector<std::string> trucePlayers; // Active truces for this turn
+    // PART 1 ASSIGNMENT 3
     PlayerStrategy *playerStrategy;        // Strategy (owned by this player)
     bool conqueredThisTurn;                // Tracks if player captured a territory this turn
     bool attacked;                         // Tracks if this player was attacked this turn
 
 public:
     Player(const std::string &n);
+    // PART 1 ASSIGNMENT 3
     Player(const std::string &n, PlayerStrategy &playerStrategy);
     Player(const Player &other);
     Player& operator=(const Player &other);
@@ -47,11 +49,14 @@ public:
     int getReinforcements() const;
     void setReinforcements(int amount);
 
+
     /*
+     * PART 1 ASSIGNMENT 3
      * setPlayerStrategy: takes ownership of the given strategy pointer.
      * The old strategy is deleted before the new one is stored.
      * Use this for dynamic strategy changes (e.g. Neutral -> Aggressive).
      */
+
     void setPlayerStrategy(PlayerStrategy *playerStrategy);
 
     friend std::ostream& operator<<(std::ostream &out, const Player &p);

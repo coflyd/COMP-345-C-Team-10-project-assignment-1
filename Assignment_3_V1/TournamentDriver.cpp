@@ -74,7 +74,7 @@ int main() {
     cout << "\n--- Test 5: Run tournament via GameEngine::tournamentMode() ---\n";
     string tournamentCmd =
         "tournament "
-        "-M src/data/europe_map/europe.map "
+        "-M data/europe_map/europe.map "
         "-P Aggressive Benevolent Neutral Cheater "
         "-G 3 "
         "-D 15";

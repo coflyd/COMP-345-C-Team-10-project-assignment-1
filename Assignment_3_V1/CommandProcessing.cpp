@@ -13,7 +13,7 @@ using namespace std;
 // Command
 // =============================================================================
 
-// "tournament" added for Assignment 3 Part 2
+// PART 2 ASSIGNMENT 3: "tournament" added to allowedCommands
 const std::array<std::string, 12> Command::allowedCommands = {
     "loadmap", "validatemap", "addplayer", "gamestart",
     "issueorder", "endissueorders", "execorder", "endexecorders",
@@ -22,19 +22,19 @@ const std::array<std::string, 12> Command::allowedCommands = {
 
 Command::Command(const std::string& cmdType)
     : type(new std::string(cmdType)),
-      effect(new std::string("")) {
+    effect(new std::string("")) {
 }
 
 Command::Command(const Command& other)
     : type(new std::string(*other.type)),
-      effect(new std::string(*other.effect)) {
+    effect(new std::string(*other.effect)) {
 }
 
-Command& Command::operator=(const Command &other) {
+Command& Command::operator=(const Command& other) {
     if (this != &other) {
         delete type;
         delete effect;
-        type   = new std::string(*other.type);
+        type = new std::string(*other.type);
         effect = new std::string(*other.effect);
     }
     return *this;
@@ -53,11 +53,11 @@ std::string Command::getEffect() const {
     return *effect;
 }
 
-void Command::saveEffect(const std::string &e) {
+void Command::saveEffect(const std::string& e) {
     *effect = e;
 }
 
-std::ostream& operator<<(std::ostream &os, const Command &c) {
+std::ostream& operator<<(std::ostream& os, const Command& c) {
     os << "Command: " << *c.type << " | Effect: " << *c.effect;
     return os;
 }
@@ -67,17 +67,17 @@ std::ostream& operator<<(std::ostream &os, const Command &c) {
 // =============================================================================
 
 CommandProcessor::CommandProcessor() :
-        commands(new std::vector<Command*>()),
-        gameEngine(nullptr) {
+    commands(new std::vector<Command*>()),
+    gameEngine(nullptr) {
 }
 
 CommandProcessor::CommandProcessor(GameEngine* engine) :
-        commands(new std::vector<Command*>()), gameEngine(engine) {
+    commands(new std::vector<Command*>()), gameEngine(engine) {
     std::cout << "CommandProcessor created.\n";
 }
 
 CommandProcessor::CommandProcessor(const CommandProcessor& other) :
-        commands(new std::vector<Command*>()), gameEngine(other.gameEngine) {
+    commands(new std::vector<Command*>()), gameEngine(other.gameEngine) {
     for (Command* cmd : *other.commands)
         commands->push_back(new Command(*cmd));
 }
@@ -105,8 +105,7 @@ void CommandProcessor::readCommand() {
 
     if (input.empty()) return;
 
-    // Accept the "tournament" command as a full line (contains spaces and flags)
-    // Check if it starts with "tournament"
+    // PART 2 ASSIGNMENT 3: handle full tournament command line
     std::string firstWord = input.substr(0, input.find(' '));
     if (firstWord == "tournament") {
         commands->push_back(new Command(input)); // store full command string
@@ -114,21 +113,21 @@ void CommandProcessor::readCommand() {
     }
 
     if (std::find(Command::allowedCommands.begin(),
-                  Command::allowedCommands.end(), input)
-            == Command::allowedCommands.end()) {
+        Command::allowedCommands.end(), input)
+        == Command::allowedCommands.end()) {
         std::cout << "Invalid command: \"" << input << "\", try again.\n";
-    } else {
+    }
+    else {
         saveCommand(input);
     }
 }
 
 bool CommandProcessor::saveCommand(const std::string& commandType) {
-    // For the tournament command the type is the full command string;
-    // we only validate the first word against allowedCommands.
+    // PART 2 ASSIGNMENT 3: validate only the first word for tournament commands
     std::string firstWord = commandType.substr(0, commandType.find(' '));
     if (std::find(Command::allowedCommands.begin(),
-                  Command::allowedCommands.end(), firstWord)
-            == Command::allowedCommands.end()) {
+        Command::allowedCommands.end(), firstWord)
+        == Command::allowedCommands.end()) {
         return false;
     }
     commands->push_back(new Command(commandType));
@@ -143,13 +142,13 @@ Command* CommandProcessor::getCommand() {
     return commands->back();
 }
 
-bool CommandProcessor::validate(const std::string &commandType,
-        const State &currentState) const {
-    // For tournament: validate only the first word
+bool CommandProcessor::validate(const std::string& commandType,
+    const State& currentState) const {
+    // PART 2 ASSIGNMENT 3: validate only first word for tournament
     std::string firstWord = commandType.substr(0, commandType.find(' '));
     if (std::find(Command::allowedCommands.begin(),
-                  Command::allowedCommands.end(), firstWord)
-            == Command::allowedCommands.end()) {
+        Command::allowedCommands.end(), firstWord)
+        == Command::allowedCommands.end()) {
         return false;
     }
     if (gameEngine != nullptr && !gameEngine->isValidTransition(firstWord)) {
@@ -174,26 +173,14 @@ std::ostream& operator<<(std::ostream& os, const CommandProcessor& cp) {
 }
 
 // =============================================================================
-// parseTournamentCommand  (Assignment 3 Part 2)
+// PART 2 ASSIGNMENT 3: parseTournamentCommand
 // =============================================================================
 
-/*
- * Parses a tournament command of the form:
- *   tournament -M <map1> ... -P <strat1> ... -G <n> -D <n>
- *
- * Validation rules:
- *   M: 1-5 map files
- *   P: 2-4 computer player strategies (Human not allowed)
- *   G: 1-5 games per map
- *   D: 10-50 max turns per game
- *
- * Returns true and fills out-parameters if valid; false otherwise.
- */
-bool parseTournamentCommand(const std::string &cmd,
-        std::vector<std::string> &maps,
-        std::vector<std::string> &strategies,
-        int &numGames,
-        int &maxTurns) {
+bool parseTournamentCommand(const std::string& cmd,
+    std::vector<std::string>& maps,
+    std::vector<std::string>& strategies,
+    int& numGames,
+    int& maxTurns) {
 
     maps.clear();
     strategies.clear();
@@ -212,20 +199,25 @@ bool parseTournamentCommand(const std::string &cmd,
     while (ss >> token) {
         if (token == "-M" || token == "-P" || token == "-G" || token == "-D") {
             currentFlag = token;
-        } else {
+        }
+        else {
             if (currentFlag == "-M") {
                 maps.push_back(token);
-            } else if (currentFlag == "-P") {
+            }
+            else if (currentFlag == "-P") {
                 strategies.push_back(token);
-            } else if (currentFlag == "-G") {
+            }
+            else if (currentFlag == "-G") {
                 try { numGames = std::stoi(token); }
                 catch (...) { numGames = 0; }
-            } else if (currentFlag == "-D") {
+            }
+            else if (currentFlag == "-D") {
                 try { maxTurns = std::stoi(token); }
                 catch (...) { maxTurns = 0; }
-            } else {
+            }
+            else {
                 std::cerr << "[Tournament] Unexpected token before any flag: "
-                          << token << "\n";
+                    << token << "\n";
                 return false;
             }
         }
@@ -234,12 +226,12 @@ bool parseTournamentCommand(const std::string &cmd,
     // Validate ranges
     if (maps.empty() || maps.size() > 5) {
         std::cerr << "[Tournament] -M: must specify 1 to 5 map files (got "
-                  << maps.size() << ").\n";
+            << maps.size() << ").\n";
         return false;
     }
     if (strategies.size() < 2 || strategies.size() > 4) {
         std::cerr << "[Tournament] -P: must specify 2 to 4 strategies (got "
-                  << strategies.size() << ").\n";
+            << strategies.size() << ").\n";
         return false;
     }
     if (numGames < 1 || numGames > 5) {
@@ -250,7 +242,7 @@ bool parseTournamentCommand(const std::string &cmd,
         std::cerr << "[Tournament] -D: must be 10 to 50 (got " << maxTurns << ").\n";
         return false;
     }
-    for (const std::string &s : strategies) {
+    for (const std::string& s : strategies) {
         if (s == "Human") {
             std::cerr << "[Tournament] Human strategy not allowed in tournament mode.\n";
             return false;
@@ -265,7 +257,7 @@ bool parseTournamentCommand(const std::string &cmd,
 
 FileLineReader::FileLineReader(const std::string& fn)
     : filename(new std::string(fn)),
-      linesRead(new int(0)) {
+    linesRead(new int(0)) {
     file.open(fn);
     if (!file.is_open())
         throw std::runtime_error("FileLineReader: cannot open file: " + fn);
@@ -273,7 +265,7 @@ FileLineReader::FileLineReader(const std::string& fn)
 
 FileLineReader::FileLineReader(const FileLineReader& other)
     : filename(new std::string(*other.filename)),
-      linesRead(new int(0)) {
+    linesRead(new int(0)) {
     file.open(*other.filename);
     if (!file.is_open())
         throw std::runtime_error(
@@ -289,7 +281,7 @@ FileLineReader& FileLineReader::operator=(const FileLineReader& other) {
         delete filename;
         delete linesRead;
 
-        filename  = new std::string(*other.filename);
+        filename = new std::string(*other.filename);
         linesRead = new int(0);
 
         file.open(*other.filename);
@@ -328,7 +320,7 @@ const std::ifstream* FileLineReader::getFile() const {
 
 std::ostream& operator<<(std::ostream& os, const FileLineReader& flr) {
     os << "FileLineReader[\"" << *flr.filename
-       << "\", linesRead=" << *flr.linesRead << "]";
+        << "\", linesRead=" << *flr.linesRead << "]";
     return os;
 }
 
@@ -337,18 +329,18 @@ std::ostream& operator<<(std::ostream& os, const FileLineReader& flr) {
 // =============================================================================
 
 FileCommandProcessorAdapter::FileCommandProcessorAdapter(
-        const std::string &filename) :
-        CommandProcessor(), fileReader(new FileLineReader(filename)) {
+    const std::string& filename) :
+    CommandProcessor(), fileReader(new FileLineReader(filename)) {
 }
 
 FileCommandProcessorAdapter::FileCommandProcessorAdapter(
-        const FileCommandProcessorAdapter& other) :
-        CommandProcessor(other),
-        fileReader(new FileLineReader(*other.fileReader)) {
+    const FileCommandProcessorAdapter& other) :
+    CommandProcessor(other),
+    fileReader(new FileLineReader(*other.fileReader)) {
 }
 
 FileCommandProcessorAdapter& FileCommandProcessorAdapter::operator=(
-        const FileCommandProcessorAdapter& other) {
+    const FileCommandProcessorAdapter& other) {
     if (this != &other) {
         CommandProcessor::operator=(other);
         delete fileReader;
@@ -365,7 +357,7 @@ void FileCommandProcessorAdapter::readCommand() {
     std::string line = fileReader->readLine();
     if (line.empty()) return;
 
-    // Accept full tournament command lines from file
+    // PART 2 ASSIGNMENT 3: handle full tournament command line from file
     std::string firstWord = line.substr(0, line.find(' '));
     if (firstWord == "tournament") {
         commands->push_back(new Command(line));
@@ -373,10 +365,11 @@ void FileCommandProcessorAdapter::readCommand() {
     }
 
     if (std::find(Command::allowedCommands.begin(),
-                  Command::allowedCommands.end(), line)
-            != Command::allowedCommands.end()) {
+        Command::allowedCommands.end(), line)
+        != Command::allowedCommands.end()) {
         saveCommand(line);
-    } else {
+    }
+    else {
         std::cout << "[FileAdapter] Unknown command ignored: \"" << line << "\"\n";
     }
 }

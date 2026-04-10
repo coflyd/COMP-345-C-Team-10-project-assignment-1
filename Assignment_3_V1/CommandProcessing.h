@@ -10,12 +10,12 @@
 class GameEngine;
 class State;
 
-// Forward declaration for the tournament parser (Part 3 Assignment 3)
-bool parseTournamentCommand(const std::string &cmd,
-        std::vector<std::string> &maps,
-        std::vector<std::string> &strategies,
-        int &numGames,
-        int &maxTurns);
+// PART 2 ASSIGNMENT 3
+bool parseTournamentCommand(const std::string& cmd,
+    std::vector<std::string>& maps,
+    std::vector<std::string>& strategies,
+    int& numGames,
+    int& maxTurns);
 
 class Command {
 private:
@@ -23,7 +23,7 @@ private:
     std::string* effect;
 
 public:
-    // "tournament" added for Assignment 3 Part 2
+    // PART 2 ASSIGNMENT 3: "tournament" added to allowed commands
     static const std::array<std::string, 12> allowedCommands;
 
     explicit Command(const std::string& cmdType);
@@ -33,38 +33,38 @@ public:
 
     std::string getType() const;
     std::string getEffect() const;
-    void saveEffect(const std::string &e);
+    void saveEffect(const std::string& e);
 
-    friend std::ostream& operator<<(std::ostream &os, const Command &c);
+    friend std::ostream& operator<<(std::ostream& os, const Command& c);
 };
 
 class CommandProcessor {
 protected:
     std::vector<Command*>* commands;
-    GameEngine *gameEngine;
+    GameEngine* gameEngine;
     virtual void readCommand();
     bool saveCommand(const std::string& commandType);
 public:
     CommandProcessor();
-    CommandProcessor(GameEngine *engine);
-    CommandProcessor(const CommandProcessor &other);
-    CommandProcessor& operator=(const CommandProcessor &other);
+    CommandProcessor(GameEngine* engine);
+    CommandProcessor(const CommandProcessor& other);
+    CommandProcessor& operator=(const CommandProcessor& other);
     virtual ~CommandProcessor();
 
     Command* getCommand();
-    bool validate(const std::string &commandType,
-            const State &currentState) const;
+    bool validate(const std::string& commandType,
+        const State& currentState) const;
     const std::vector<Command*>& getCommands() const;
     void setGameEngine(GameEngine* engine);
 
-    friend std::ostream& operator<<(std::ostream &os,
-            const CommandProcessor &cp);
+    friend std::ostream& operator<<(std::ostream& os,
+        const CommandProcessor& cp);
     friend class GameEngine;
 };
 
 class FileLineReader {
 private:
-    std::string*  filename;
+    std::string* filename;
     std::ifstream file;
     int* linesRead;
 public:
@@ -80,9 +80,9 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const FileLineReader& flr);
 };
 
-class FileCommandProcessorAdapter: public CommandProcessor {
+class FileCommandProcessorAdapter : public CommandProcessor {
 private:
-    FileLineReader *fileReader;
+    FileLineReader* fileReader;
 protected:
     void readCommand() override;
 public:

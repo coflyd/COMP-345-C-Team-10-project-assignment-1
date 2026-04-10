@@ -396,7 +396,6 @@ std::vector<Country*> NeutralPlayerStrategy::toAttack(
  * issueOrder: issues no orders.
  * If this player was attacked this turn it switches to Aggressive dynamically
  * and delegates to the new strategy for the remainder of this call.
- * IMPORTANT: after setPlayerStrategy() is called, 'this' is deleted.
  *            No member access is allowed after that point.
  */
 void NeutralPlayerStrategy::issueOrder(std::vector<Player*> &allPlayers,
